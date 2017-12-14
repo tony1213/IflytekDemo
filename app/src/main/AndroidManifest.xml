@@ -50,8 +50,8 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".iflytek.IflySpeakService" />
-        <service android:name=".iflytek.IflyVoiceToTextService" />
+        <service android:name=".iflytek.TTSService" />
+        <service android:name=".iflytek.VTTService" />
     </application>
 
 </manifest>

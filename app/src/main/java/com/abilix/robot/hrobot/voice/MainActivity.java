@@ -1,17 +1,23 @@
 package com.abilix.robot.hrobot.voice;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
-import com.abilix.robot.hrobot.voice.common.BroadcastAction;
 import com.abilix.robot.hrobot.voice.event.CloudResult;
 import com.abilix.robot.hrobot.voice.event.RecognizeResult;
-import com.abilix.robot.hrobot.voice.iflytek.IflySpeakService;
-import com.abilix.robot.hrobot.voice.iflytek.IflyVoiceToTextService;
+import com.abilix.robot.hrobot.voice.event.SpeechStatus;
+import com.abilix.robot.hrobot.voice.iflytek.TTSBinder;
+import com.abilix.robot.hrobot.voice.iflytek.TTSService;
+import com.abilix.robot.hrobot.voice.iflytek.VTTBinder;
+import com.abilix.robot.hrobot.voice.iflytek.VTTService;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -28,29 +34,60 @@ public class MainActivity extends Activity {
     @BindView(R.id.cloud_result)
     public TextView mCloudResult;
 
+    private ServiceConnection serviceConnection_vtt;
+    private ServiceConnection serviceConnection_tts;
+    private VTTBinder vttBinder;
+    private TTSBinder ttsBinder;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         EventBus.getDefault().register(this);
         ButterKnife.bind(this);
-        //科大讯飞语音合成（嘴巴<在线或者离线语音合成>）
-        startService(new Intent(this, IflySpeakService.class));
-        //语音听写（耳朵<声音转化成文字>）
-        startService(new Intent(this, IflyVoiceToTextService.class));
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        serviceConnection_vtt = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                vttBinder = (VTTBinder) service;
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                vttBinder = null;
+            }
+        };
+        Intent intent = new Intent(this, VTTService.class);
+        startService(intent);
+        bindService(intent, serviceConnection_vtt, 0);
+        serviceConnection_tts = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                ttsBinder = (TTSBinder) service;
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                ttsBinder = null;
+            }
+        };
+        Intent intent2 = new Intent(this, TTSService.class);
+        startService(intent2);
+        bindService(intent2, serviceConnection_tts, 0);
     }
 
     @OnClick({R.id.start, R.id.stop})
     public void execClick(View view) {
-        Intent intent = new Intent();
         switch (view.getId()) {
             case R.id.start:
-                intent.setAction(BroadcastAction.ACTION_RESUME_MONITOR_CHAT);
-                sendBroadcast(intent);
+                vttBinder.listenStart();
                 break;
             case R.id.stop:
-                intent.setAction(BroadcastAction.ACTION_STOP_LISTENER);
-                sendBroadcast(intent);
+                vttBinder.listenStop();
                 break;
         }
     }
@@ -59,10 +96,7 @@ public class MainActivity extends Activity {
     public void onCloudResultReceivedEvent(CloudResult event) {
         Log.e("voice", "event:" + event.getData());
         mCloudResult.setText(event.getData());
-        Intent intent = new Intent();
-        intent.setAction(BroadcastAction.ACTION_VOICE_TO_TEXT_SPEAK);
-        intent.putExtra("result",event.getData());
-        sendBroadcast(intent);
+        ttsBinder.speak(event.getData(), true);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -71,16 +105,24 @@ public class MainActivity extends Activity {
         mRecognizeResult.setText(event.getData());
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onSpeechCompletedEvent(SpeechStatus event) {
+        Log.e("voice", "event3:" + event.getStatus());
+        if (TextUtils.equals("Completed", event.getStatus())) {
+            vttBinder.listenStart();
+        }
+    }
+
     @Override
     protected void onStop() {
-        EventBus.getDefault().unregister(this);
         super.onStop();
+        EventBus.getDefault().unregister(this);
+        unbindService(serviceConnection_vtt);
+        unbindService(serviceConnection_tts);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        stopService(new Intent(this, IflySpeakService.class));
-        stopService(new Intent(this, IflyVoiceToTextService.class));
     }
 }

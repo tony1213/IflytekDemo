@@ -1,17 +1,13 @@
 package com.abilix.robot.hrobot.voice.iflytek;
 
 import android.app.Service;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.text.TextUtils;
 import android.util.Log;
 
-import com.abilix.robot.hrobot.voice.common.BroadcastAction;
 import com.abilix.robot.hrobot.voice.common.DataConfig;
+import com.abilix.robot.hrobot.voice.event.SpeechStatus;
 import com.abilix.robot.hrobot.voice.iflytek.util.IflyUtils;
 import com.iflytek.cloud.ErrorCode;
 import com.iflytek.cloud.InitListener;
@@ -20,24 +16,27 @@ import com.iflytek.cloud.SpeechEvent;
 import com.iflytek.cloud.SpeechSynthesizer;
 import com.iflytek.cloud.SynthesizerListener;
 
-public class IflySpeakService extends Service {
+import org.greenrobot.eventbus.EventBus;
+
+public class TTSService extends Service {
+    private final TTSBinder binder;
     // 语音合成对象
     private SpeechSynthesizer mTts;
-    private boolean isConnectNetWork;
 
     @Override
     public IBinder onBind(Intent arg0) {
-        return null;
+        return binder;
+    }
+
+    public TTSService() {
+        super();
+        this.binder = new TTSBinder(this);
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
         mTts = SpeechSynthesizer.createSynthesizer(this, mTtsInitListener);
-
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(BroadcastAction.ACTION_VOICE_TO_TEXT_SPEAK);
-        registerReceiver(receiver, filter);
     }
 
     @Override
@@ -45,23 +44,7 @@ public class IflySpeakService extends Service {
         return super.onStartCommand(intent, flags, startId);
     }
 
-    BroadcastReceiver receiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(BroadcastAction.ACTION_VOICE_TO_TEXT_SPEAK)) {// 对话发来的广播
-                String voiceText = intent.getStringExtra("result");
-                if (!TextUtils.isEmpty(voiceText)) {
-                    isConnectNetWork = true;//默认网络正常
-                    speak(voiceText, isConnectNetWork);
-                } else {
-                    intent.setAction(BroadcastAction.ACTION_RESUME_MONITOR_CHAT);
-                    sendBroadcast(intent);
-                }
-            }
-        }
-    };
-
-    private void speak(String content, boolean isTypeCloud) {
+    public void speak(String content, boolean isTypeCloud) {
         String speakMen = "";
         if (isTypeCloud) {
             if (DataConfig.isLanguageSwitch) {
@@ -134,9 +117,7 @@ public class IflySpeakService extends Service {
             //说话结束
             if (error == null) {
                 Log.i("Speak", "播放完成 ");
-                Intent intent = new Intent();
-                intent.setAction(BroadcastAction.ACTION_RESUME_MONITOR_CHAT);
-                sendBroadcast(intent);
+                EventBus.getDefault().post(new SpeechStatus("Completed"));
             } else if (error != null) {
                 Log.e("Speak", "onCompleted  error=" + error.getPlainDescription(true));
             }
@@ -161,7 +142,6 @@ public class IflySpeakService extends Service {
         }
         // 退出时释放连接
         mTts.destroy();
-        unregisterReceiver(receiver);
     }
 
 }
