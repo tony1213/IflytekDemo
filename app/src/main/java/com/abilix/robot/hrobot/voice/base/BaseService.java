@@ -19,6 +19,9 @@ public class BaseService extends Service {
     private OkHttpClient okHttpClient;
     public Retrofit retrofit;
 
+    private static final String BASE_URL = "http://www.tuling123.com/";
+    private static final String BASE_URL2 = "http://10.107.2.137:8080/ApolloWebService/";
+
     @Override
     public IBinder onBind(Intent intent) {
         return null;
@@ -34,7 +37,7 @@ public class BaseService extends Service {
                 .build();
         retrofit = new Retrofit.Builder()
                 .client(okHttpClient)
-                .baseUrl("http://www.tuling123.com/")
+                .baseUrl(BASE_URL2)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
     }

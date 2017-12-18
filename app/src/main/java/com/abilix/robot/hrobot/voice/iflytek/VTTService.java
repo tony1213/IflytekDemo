@@ -10,6 +10,7 @@ import com.abilix.robot.hrobot.voice.common.DataConfig;
 import com.abilix.robot.hrobot.voice.event.CloudResult;
 import com.abilix.robot.hrobot.voice.event.RecognizeResult;
 import com.abilix.robot.hrobot.voice.turing.entity.TuringResultInfo;
+import com.abilix.robot.hrobot.voice.turing.entity.VoiceResultInfo;
 import com.abilix.robot.hrobot.voice.turing.service.TuringService;
 import com.abilix.robot.hrobot.voice.util.GsonParse;
 import com.abilix.robot.hrobot.voice.iflytek.util.IflyUtils;
@@ -114,7 +115,7 @@ public class VTTService extends BaseService {
                     mIat.cancel();
                 }
                 EventBus.getDefault().post(new RecognizeResult(result));
-                TuringService apiService = retrofit.create(TuringService.class);
+                /*TuringService apiService = retrofit.create(TuringService.class);
                 Call<TuringResultInfo> call = apiService.search("0cdd9edd8c34a2825efb676e5c1f7192", result, "64592827");
                 call.enqueue(new Callback<TuringResultInfo>() {
                     @Override
@@ -130,6 +131,19 @@ public class VTTService extends BaseService {
                     @Override
                     public void onFailure(Call<TuringResultInfo> call, Throwable t) {
                         t.printStackTrace();
+                    }
+                });*/
+                TuringService apiService = retrofit.create(TuringService.class);
+                Call<VoiceResultInfo> call = apiService.send(result,"64592827");
+                call.enqueue(new Callback<VoiceResultInfo>() {
+                    @Override
+                    public void onResponse(Call<VoiceResultInfo> call, Response<VoiceResultInfo> response) {
+                        Log.e("App","Data:"+response.body().getText());
+                    }
+
+                    @Override
+                    public void onFailure(Call<VoiceResultInfo> call, Throwable t) {
+
                     }
                 });
             }
