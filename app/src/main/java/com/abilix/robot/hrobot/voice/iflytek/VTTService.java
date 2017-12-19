@@ -115,26 +115,8 @@ public class VTTService extends BaseService {
                     mIat.cancel();
                 }
                 EventBus.getDefault().post(new RecognizeResult(result));
-                /*TuringService apiService = retrofit.create(TuringService.class);
-                Call<TuringResultInfo> call = apiService.search("0cdd9edd8c34a2825efb676e5c1f7192", result, "64592827");
-                call.enqueue(new Callback<TuringResultInfo>() {
-                    @Override
-                    public void onResponse(Call<TuringResultInfo> call, Response<TuringResultInfo> response) {
-                        Log.e("APP", "code:" + response.body().getCode() + ",text:" + response.body().getText() + ",url:" + response.body().getUrl());
-                        if (response.body().getText() != null) {
-                            EventBus.getDefault().post(new CloudResult(response.body().getText()));
-                        } else {
-                            EventBus.getDefault().post(new CloudResult("Error Result"));
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<TuringResultInfo> call, Throwable t) {
-                        t.printStackTrace();
-                    }
-                });*/
                 TuringService apiService = retrofit.create(TuringService.class);
-                Call<VoiceResultInfo> call = apiService.send(result,"64592827");
+                Call<VoiceResultInfo> call = apiService.send(result,"002");
                 call.enqueue(new Callback<VoiceResultInfo>() {
                     @Override
                     public void onResponse(Call<VoiceResultInfo> call, Response<VoiceResultInfo> response) {

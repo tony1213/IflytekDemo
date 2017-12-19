@@ -30,8 +30,8 @@ public class ApolloService extends Service {
     private String host = "tcp://10.107.2.137:61613";
     private String userName = "admin";
     private String passWord = "password";
-    private static final String clientid = "Hrobot001";
-    public static final String TOPIC = "toclient/124";
+    private static final String clientid = "H_Robot_002";
+    public static final String TOPIC = "toclient/125";
     private int i = 1;
 
     private Handler handler;

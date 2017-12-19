@@ -7,7 +7,6 @@ import android.os.IBinder;
 import android.util.Log;
 
 import com.abilix.robot.hrobot.voice.common.DataConfig;
-import com.abilix.robot.hrobot.voice.event.SpeechStatus;
 import com.abilix.robot.hrobot.voice.iflytek.util.IflyUtils;
 import com.iflytek.cloud.ErrorCode;
 import com.iflytek.cloud.InitListener;
@@ -15,8 +14,6 @@ import com.iflytek.cloud.SpeechError;
 import com.iflytek.cloud.SpeechEvent;
 import com.iflytek.cloud.SpeechSynthesizer;
 import com.iflytek.cloud.SynthesizerListener;
-
-import org.greenrobot.eventbus.EventBus;
 
 public class TTSService extends Service {
     private final TTSBinder binder;
@@ -117,7 +114,6 @@ public class TTSService extends Service {
             //说话结束
             if (error == null) {
                 Log.i("Speak", "播放完成 ");
-                EventBus.getDefault().post(new SpeechStatus("Completed"));
             } else if (error != null) {
                 Log.e("Speak", "onCompleted  error=" + error.getPlainDescription(true));
             }

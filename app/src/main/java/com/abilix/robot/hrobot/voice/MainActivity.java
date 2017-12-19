@@ -1,23 +1,17 @@
 package com.abilix.robot.hrobot.voice;
 
 import android.app.Activity;
-import android.app.Notification;
-import android.app.NotificationManager;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.widget.RemoteViews;
 import android.widget.TextView;
 
 import com.abilix.robot.hrobot.voice.event.CloudResult;
 import com.abilix.robot.hrobot.voice.event.RecognizeResult;
-import com.abilix.robot.hrobot.voice.event.SpeechStatus;
 import com.abilix.robot.hrobot.voice.iflytek.TTSBinder;
 import com.abilix.robot.hrobot.voice.iflytek.TTSService;
 import com.abilix.robot.hrobot.voice.iflytek.VTTBinder;
@@ -121,28 +115,12 @@ public class MainActivity extends Activity {
         Log.e("voice", "event:" + event.getData());
         mCloudResult.setText(event.getData());
         ttsBinder.speak(event.getData(), true);
-        /*NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        Notification notification = new Notification(R.mipmap.ic_launcher, "Mqtt即时推送", System.currentTimeMillis());
-        notification.contentView = new RemoteViews("com.abilix.robot.hrobot.voice", R.layout.activity_notification);
-        notification.contentView.setTextViewText(R.id.tv_desc, event.getData());
-        notification.defaults = Notification.DEFAULT_SOUND;
-        notification.flags = Notification.FLAG_AUTO_CANCEL;
-        manager.notify(i++, notification);*/
-
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onRecognizeResultReceivedEvent(RecognizeResult event) {
         Log.e("voice", "event2:" + event.getData());
         mRecognizeResult.setText(event.getData());
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onSpeechCompletedEvent(SpeechStatus event) {
-        Log.e("voice", "event3:" + event.getStatus());
-        if (TextUtils.equals("Completed", event.getStatus())) {
-            vttBinder.listenStart();
-        }
     }
 
     @Override
