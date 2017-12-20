@@ -1,6 +1,5 @@
 package com.abilix.robot.hrobot.voice.apollo;
 
-import android.app.Service;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
@@ -8,7 +7,13 @@ import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.abilix.robot.hrobot.voice.event.CloudResult;
+import com.abilix.robot.hrobot.voice.base.BaseService;
+import com.abilix.robot.hrobot.voice.event.UserQuestionResult;
+import com.abilix.robot.hrobot.voice.event.TuringCloudAnswer;
+import com.abilix.robot.hrobot.voice.turing.entity.TuringResultInfo;
+import com.abilix.robot.hrobot.voice.turing.entity.VoiceResultInfo;
+import com.abilix.robot.hrobot.voice.turing.service.AbilixCloudService;
+import com.abilix.robot.hrobot.voice.turing.service.TuringService;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -23,7 +28,11 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.greenrobot.eventbus.EventBus;
 
-public class ApolloService extends Service {
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class ApolloService extends BaseService {
 
     private final ApolloBinder binder;
 
@@ -124,7 +133,43 @@ public class ApolloService extends Service {
                 public void messageArrived(String topicName, MqttMessage message) throws Exception {
                     //subscribe后得到的消息会执行到这里面
                     Log.e("Apollo", "messageArrived");
-                    EventBus.getDefault().post(new CloudResult(message.toString()));
+                    EventBus.getDefault().post(new UserQuestionResult(message.toString()));
+
+                    /*AbilixCloudService apiService = retrofit.create(AbilixCloudService.class);
+                    Call<VoiceResultInfo> call = apiService.send(message.toString());
+                    call.enqueue(new Callback<VoiceResultInfo>() {
+                        @Override
+                        public void onResponse(Call<VoiceResultInfo> call, Response<VoiceResultInfo> response) {
+                            Log.e("Apollo","MyServer:"+response.body().toString());
+                            Toast.makeText(ApolloService.this,response.body().getText(),Toast.LENGTH_LONG).show();
+                            EventBus.getDefault().post(new TuringCloudAnswer(response.body().getText()));
+                        }
+
+                        @Override
+                        public void onFailure(Call<VoiceResultInfo> call, Throwable t) {
+
+                        }
+                    });*/
+
+
+                    //图灵的知识库
+                    TuringService apiService = retrofit.create(TuringService.class);
+                    Call<TuringResultInfo> call = apiService.search("0cdd9edd8c34a2825efb676e5c1f7192", message.toString(), "002");
+                    call.enqueue(new Callback<TuringResultInfo>() {
+                        @Override
+                        public void onResponse(Call<TuringResultInfo> call, Response<TuringResultInfo> response) {
+                            if (response.body()!=null){
+                                Log.e("Apollo", "Apollo:" + response.body().getText());
+                                EventBus.getDefault().post(new TuringCloudAnswer(response.body().getText()));
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<TuringResultInfo> call, Throwable t) {
+
+                        }
+                    });
+
                 }
             });
         } catch (Exception e) {

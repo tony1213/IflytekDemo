@@ -1,17 +1,13 @@
 package com.abilix.robot.hrobot.voice.iflytek;
 
+import android.app.Service;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.abilix.robot.hrobot.voice.base.BaseService;
 import com.abilix.robot.hrobot.voice.common.DataConfig;
-import com.abilix.robot.hrobot.voice.event.CloudResult;
-import com.abilix.robot.hrobot.voice.event.RecognizeResult;
-import com.abilix.robot.hrobot.voice.turing.entity.TuringResultInfo;
-import com.abilix.robot.hrobot.voice.turing.entity.VoiceResultInfo;
-import com.abilix.robot.hrobot.voice.turing.service.TuringService;
+import com.abilix.robot.hrobot.voice.event.CustomerAnswerResult;
 import com.abilix.robot.hrobot.voice.util.GsonParse;
 import com.abilix.robot.hrobot.voice.iflytek.util.IflyUtils;
 import com.iflytek.cloud.ErrorCode;
@@ -27,11 +23,8 @@ import org.greenrobot.eventbus.EventBus;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
-public class VTTService extends BaseService {
+public class VTTService extends Service {
 
     private final VTTBinder binder;
     private SpeechRecognizer mIat; // 语音听写对象
@@ -60,6 +53,7 @@ public class VTTService extends BaseService {
     public void listenBegin() {
         listen(true, DataConfig.VOICER_TIPS_DEFAULT);
     }
+
     //停止听
     public void stopListen() {
         if (mIat.isListening()) {
@@ -108,26 +102,13 @@ public class VTTService extends BaseService {
 
         @Override
         public void onResult(RecognizerResult results, boolean isLast) {
-            String result = GsonParse.printResult(results, mIatResults);
+            final String result = GsonParse.printResult(results, mIatResults);
             Log.i("voice", "识别结果：" + result);
             if (isLast) {
                 if (mIat.isListening()) {
                     mIat.cancel();
                 }
-                EventBus.getDefault().post(new RecognizeResult(result));
-                TuringService apiService = retrofit.create(TuringService.class);
-                Call<VoiceResultInfo> call = apiService.send(result,"002");
-                call.enqueue(new Callback<VoiceResultInfo>() {
-                    @Override
-                    public void onResponse(Call<VoiceResultInfo> call, Response<VoiceResultInfo> response) {
-                        Log.e("App","Data:"+response.body().getText());
-                    }
-
-                    @Override
-                    public void onFailure(Call<VoiceResultInfo> call, Throwable t) {
-
-                    }
-                });
+                EventBus.getDefault().post(new CustomerAnswerResult(result));
             }
         }
 
@@ -152,7 +133,7 @@ public class VTTService extends BaseService {
         public void onInit(int code) {
             if (code != ErrorCode.SUCCESS) {
                 //初始化失败,错误码
-                Log.e("voice", "初始化失败:"+code);
+                Log.e("voice", "初始化失败:" + code);
             } else {
                 // 初始化成功，之后可以调用startSpeaking方法
                 // 注：有的开发者在onCreate方法中创建完合成对象之后马上就调用startSpeaking进行合成，

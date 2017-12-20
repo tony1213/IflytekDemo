@@ -13,11 +13,12 @@ import retrofit2.http.Query;
  */
 
 public interface TuringService {
+    @Headers({"url_name:turing"})
     @POST("openapi/api")
     Call<TuringResultInfo> search(@Query("key") String type, @Query("info") String info, @Query("userid") String userid);
 
+    @Headers({"url_name:server"})
     @POST("ApolloServer")
-//    @Headers({"Content-Type: application/json;charset=UTF-8"})
     Call<VoiceResultInfo> send(@Query("info") String info, @Query("userid") String userid);
 
 }

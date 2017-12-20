@@ -1,13 +1,14 @@
 package com.abilix.robot.hrobot.voice.event;
 
-public class RecognizeResult {
+
+public class TuringCloudAnswer {
     public String data;
 
     public String getData() {
         return data;
     }
 
-    public RecognizeResult(String data) {
+    public TuringCloudAnswer(String data) {
 
         this.data = data;
     }

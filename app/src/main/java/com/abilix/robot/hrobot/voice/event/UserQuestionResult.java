@@ -1,14 +1,13 @@
 package com.abilix.robot.hrobot.voice.event;
 
-
-public class CloudResult {
+public class UserQuestionResult {
     public String data;
 
     public String getData() {
         return data;
     }
 
-    public CloudResult(String data) {
+    public UserQuestionResult(String data) {
 
         this.data = data;
     }

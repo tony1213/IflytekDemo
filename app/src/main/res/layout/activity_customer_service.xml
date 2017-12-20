@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.abilix.robot.hrobot.voice.MainActivity">
+
+    <LinearLayout
+        android:id="@+id/ll_question"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="用户问题" />
+
+        <EditText
+            android:id="@+id/et_customer_question"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:inputType="none"
+            android:text="显示问题" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2"
+        android:baselineAligned="false"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical">
+            <EditText
+                android:id="@+id/et_cloud_answer"
+                android:layout_width="match_parent"
+                android:layout_height="158dp"
+                android:text="云端结果" />
+            <Button
+                android:id="@+id/btn_select_cloud"
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:text="选择云端" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_weight="1">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="156dp">
+                <EditText
+                    android:id="@+id/et_customer_answer"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="客服结果"
+                    android:layout_toLeftOf="@+id/btn_customer_voice"
+                    android:layout_toStartOf="@+id/btn_customer_voice" />
+                <Button
+                    android:id="@+id/btn_customer_voice"
+                    android:layout_width="55dp"
+                    android:layout_height="match_parent"
+                    android:text="录音"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentBottom="true" />
+            </RelativeLayout>
+            <Button
+                android:id="@+id/btn_select_customer"
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:text="选择客服" />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>
