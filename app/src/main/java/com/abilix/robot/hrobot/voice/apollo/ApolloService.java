@@ -27,7 +27,10 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.greenrobot.eventbus.EventBus;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -135,25 +138,36 @@ public class ApolloService extends BaseService {
                     Log.e("Apollo", "messageArrived");
                     EventBus.getDefault().post(new UserQuestionResult(message.toString()));
 
-                    /*AbilixCloudService apiService = retrofit.create(AbilixCloudService.class);
-                    Call<VoiceResultInfo> call = apiService.send(message.toString());
-                    call.enqueue(new Callback<VoiceResultInfo>() {
+                    //Abilix的知识库
+                    AbilixCloudService apiService = retrofit.create(AbilixCloudService.class);
+                    Call<ResponseBody> call = apiService.query(message.toString());
+                    call.enqueue(new Callback<ResponseBody>() {
                         @Override
-                        public void onResponse(Call<VoiceResultInfo> call, Response<VoiceResultInfo> response) {
-                            Log.e("Apollo","MyServer:"+response.body().toString());
-                            Toast.makeText(ApolloService.this,response.body().getText(),Toast.LENGTH_LONG).show();
-                            EventBus.getDefault().post(new TuringCloudAnswer(response.body().getText()));
+                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+
+                            try {
+                                String result = new String(response.body().bytes());
+                                try {
+                                    JSONObject jsonObject = new JSONObject(result);
+                                    String answer = jsonObject.getString("ans");
+                                    EventBus.getDefault().post(new TuringCloudAnswer(answer));
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                         }
 
                         @Override
-                        public void onFailure(Call<VoiceResultInfo> call, Throwable t) {
+                        public void onFailure(Call<ResponseBody> call, Throwable t) {
 
                         }
-                    });*/
+                    });
 
 
                     //图灵的知识库
-                    TuringService apiService = retrofit.create(TuringService.class);
+                    /*TuringService apiService = retrofit.create(TuringService.class);
                     Call<TuringResultInfo> call = apiService.search("0cdd9edd8c34a2825efb676e5c1f7192", message.toString(), "002");
                     call.enqueue(new Callback<TuringResultInfo>() {
                         @Override
@@ -168,7 +182,7 @@ public class ApolloService extends BaseService {
                         public void onFailure(Call<TuringResultInfo> call, Throwable t) {
 
                         }
-                    });
+                    });*/
 
                 }
             });

@@ -23,8 +23,8 @@ public class BaseService extends Service {
     private OkHttpClient okHttpClient;
     public Retrofit retrofit;
 
-    private static final String BASE_URL_TURING = "http://www.tuling123.com/";
-//    private static final String BASE_URL_TURING = "http://chart.abilixstore.com/";
+//    private static final String BASE_URL_TURING = "http://www.tuling123.com/";
+    private static final String BASE_URL_TURING = "http://chart.abilixstore.com/";
 
     @Override
     public IBinder onBind(Intent intent) {
